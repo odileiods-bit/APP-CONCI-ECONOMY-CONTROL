@@ -3,12 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <title>Falou, Lançou</title>
+
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial;
+      padding: 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 300px;
+      background: #1e1e1e;
+      color: white;
+      border: 1px solid #333;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px;
+      margin-left: 5px;
+      background: #00c853;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #00e676;
+    }
+
+    ul {
+      margin-top: 10px;
+    }
+
+    li {
+      margin-bottom: 5px;
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    h1 {
+      color: #00e676;
+    }
+
+    h2 {
+      color: #00e676;
+    }
+  </style>
+
 </head>
-<body style="font-family: Arial; padding: 20px;">
+
+<body>
 
   <h1>💸 Falou, Lançou</h1>
 
-  <input id="input" placeholder="Ex: 50 padaria" style="padding:10px; width:300px;">
+  <input id="input" placeholder="Ex: 50 padaria">
   <button onclick="adicionar()">Adicionar</button>
 
   <h2>Total: R$ <span id="total">0</span></h2>
