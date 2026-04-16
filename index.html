@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Falou, Lançou</title>
+</head>
+<body style="font-family: Arial; padding: 20px;">
+
+  <h1>💸 Falou, Lançou</h1>
+
+  <input id="input" placeholder="Ex: 50 padaria" style="padding:10px; width:300px;">
+  <button onclick="adicionar()">Adicionar</button>
+
+  <h2>Total: R$ <span id="total">0</span></h2>
+
+  <h3>Histórico</h3>
+  <ul id="lista"></ul>
+
+  <script>
+    let total = 0
+
+    function adicionar() {
+      let texto = document.getElementById("input").value
+
+      if (!texto) return
+
+      let valor = extrairValor(texto)
+
+      if (!valor) {
+        alert("Não entendi o valor 😅")
+        return
+      }
+
+      total += valor
+      document.getElementById("total").innerText = total.toFixed(2)
+
+      let li = document.createElement("li")
+      li.innerText = texto + " - R$ " + valor.toFixed(2) + " - " + new Date().toLocaleString()
+
+      document.getElementById("lista").appendChild(li)
+
+      document.getElementById("input").value = ""
+    }
+
+    function extrairValor(texto) {
+      let numero = texto.match(/\d+/)
+      return numero ? parseFloat(numero[0]) : 0
+    }
+  </script>
+
+</body>
+</html>
