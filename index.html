@@ -3,57 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Falou, Lançou</title>
-
-  <style>
-    body {
-      background-color: #121212;
-      color: white;
-      font-family: Arial;
-      padding: 20px;
-    }
-
-    input {
-      padding: 10px;
-      width: 300px;
-      background: #1e1e1e;
-      color: white;
-      border: 1px solid #333;
-      border-radius: 5px;
-    }
-
-    button {
-      padding: 10px;
-      margin-left: 5px;
-      background: #00c853;
-      color: black;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    ul {
-      margin-top: 10px;
-    }
-
-    li {
-      margin-bottom: 5px;
-      background: #1e1e1e;
-      padding: 10px;
-      border-radius: 5px;
-    }
-
-    h1 {
-      color: #00e676;
-    }
-  </style>
 </head>
-
-<body>
+<body style="font-family: Arial; padding: 20px;">
 
   <h1>💸 Falou, Lançou</h1>
 
-  <input id="input" placeholder="Ex: 50 padaria">
+  <input id="input" placeholder="Ex: 50 padaria" style="padding:10px; width:300px;">
   <button onclick="adicionar()">Adicionar</button>
 
   <h2>Total: R$ <span id="total">0</span></h2>
@@ -62,34 +17,34 @@
   <ul id="lista"></ul>
 
   <script>
-    let total = 0;
+    let total = 0
 
     function adicionar() {
-      let texto = document.getElementById("input").value;
+      let texto = document.getElementById("input").value
 
-      if (!texto) return;
+      if (!texto) return
 
-      let valor = extrairValor(texto);
+      let valor = extrairValor(texto)
 
       if (!valor) {
-        alert("Não entendi o valor 😅");
-        return;
+        alert("Não entendi o valor 😅")
+        return
       }
 
-      total += valor;
-      document.getElementById("total").innerText = total.toFixed(2);
+      total += valor
+      document.getElementById("total").innerText = total.toFixed(2)
 
-      let li = document.createElement("li");
-      li.innerText = texto + " - R$ " + valor.toFixed(2) + " - " + new Date().toLocaleString();
+      let li = document.createElement("li")
+      li.innerText = texto + " - R$ " + valor.toFixed(2) + " - " + new Date().toLocaleString()
 
-      document.getElementById("lista").appendChild(li);
+      document.getElementById("lista").appendChild(li)
 
-      document.getElementById("input").value = "";
+      document.getElementById("input").value = ""
     }
 
     function extrairValor(texto) {
-      let numero = texto.match(/\d+/);
-      return numero ? parseFloat(numero[0]) : 0;
+      let numero = texto.match(/\d+/)
+      return numero ? parseFloat(numero[0]) : 0
     }
   </script>
 
