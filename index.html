@@ -76,12 +76,12 @@
 </div>
 
 <div class="input-area">
-  <div class="input-wrap">
-    <input type="text" id="gasto-input" placeholder='ex: "padaria 47" ou "total do mês"' autocomplete="off"/>
-    <button class="send-btn" id="send-btn" onclick="processar()">
+  <form class="input-wrap" onsubmit="processar(event)">
+    <input type="text" id="gasto-input" placeholder='ex: "padaria 47" ou "total do mês"' autocomplete="off" autocorrect="off" autocapitalize="off"/>
+    <button type="submit" class="send-btn" id="send-btn">
       <svg viewBox="0 0 16 16"><path d="M14 8L2 2l2.5 6L2 14l12-6z"/></svg>
     </button>
-  </div>
+  </form>
   <div class="input-hint">fale o gasto ou faça uma pergunta · enter para enviar</div>
   <div class="processing" id="processing">
     <div class="dot-anim"><span></span><span></span><span></span></div>
@@ -149,7 +149,8 @@ function esconderProcessando(){document.getElementById('processing').classList.r
 function mostrarConsulta(t){document.getElementById('consulta-card').textContent=t;document.getElementById('consulta-resp').classList.add('show');}
 function esconderConsulta(){document.getElementById('consulta-resp').classList.remove('show');}
 
-async function processar() {
+async function processar(e) {
+  if(e) e.preventDefault();
   const el=document.getElementById('gasto-input');
   const texto=(el.value||'').trim();
   if(!texto){el.blur();return;}
@@ -193,7 +194,7 @@ Regras:
   }catch(err){esconderProcessando();mostrarConsulta('Erro de conexão. Verifique sua internet.');}
 }
 
-document.getElementById('gasto-input').addEventListener('keydown',e=>{if(e.key==='Enter')processar();});
+
 loadGastos();atualizarTotal();renderHistorico();
 </script>
 </body>
