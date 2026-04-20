@@ -151,9 +151,11 @@ function esconderConsulta(){document.getElementById('consulta-resp').classList.r
 
 async function processar() {
   const input=document.getElementById('gasto-input');
-  input.blur(); const texto=input.value.trim();
+  input.focus();
+  const texto=input.value.trim();
   if(!texto) return;
   input.value='';
+  input.blur();
   esconderConsulta();
   const ehConsulta=/total|quanto|histórico|gastei|resumo|listar|mostrar|hoje|mês|semana|categoria/i.test(texto);
   mostrarProcessando(ehConsulta?'consultando...':'entendendo gasto...');
