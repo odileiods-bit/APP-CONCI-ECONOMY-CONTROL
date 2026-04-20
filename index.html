@@ -178,10 +178,10 @@ Regras:
     const resp=await fetch(WORKER_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({apiKey:API_KEY,model:'claude-haiku-4-5-20251001',max_tokens:300,system:systemPrompt,messages:[{role:'user',content:userMessage}]})
+      body:JSON.stringify({apiKey:API_KEY,model:'claude-haiku-4-5',max_tokens:300,system:systemPrompt,messages:[{role:'user',content:userMessage}]})
     });
     const data=await resp.json();
-    const respText=data.content?.map(c=>c.text||'').join('').trim();
+    const respText=data.content?.map(c=>c.text||'').join('').trim(); console.log('RAW:',JSON.stringify(data));
     esconderProcessando();
     if(ehConsulta){mostrarConsulta(respText);}
     else{
