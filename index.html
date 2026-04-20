@@ -150,12 +150,11 @@ function mostrarConsulta(t){document.getElementById('consulta-card').textContent
 function esconderConsulta(){document.getElementById('consulta-resp').classList.remove('show');}
 
 async function processar() {
-  const input=document.getElementById('gasto-input');
-  input.focus();
-  const texto=input.value.trim();
-  if(!texto) return;
-  input.value='';
-  input.blur();
+  const el=document.getElementById('gasto-input');
+  const texto=(el.value||'').trim();
+  if(!texto){el.blur();return;}
+  el.value='';
+  el.blur();
   esconderConsulta();
   const ehConsulta=/total|quanto|histórico|gastei|resumo|listar|mostrar|hoje|mês|semana|categoria/i.test(texto);
   mostrarProcessando(ehConsulta?'consultando...':'entendendo gasto...');
