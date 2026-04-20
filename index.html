@@ -558,9 +558,8 @@ Regras:
   try {
     const resp = await fetch('https://soft-mode-5249.odileiods.workers.dev', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        apiKey: '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',
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 300,
         system: systemPrompt,
