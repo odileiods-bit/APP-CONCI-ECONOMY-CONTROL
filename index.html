@@ -155,7 +155,7 @@
   }
   #gasto-input {
     width: 100%;
-    padding: 16px 60px 16px 18px;
+    padding: 16px 104px 16px 18px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -185,6 +185,33 @@
   .send-btn:hover { transform: scale(1.05); }
   .send-btn:active { transform: scale(0.95); }
   .send-btn svg { width: 16px; height: 16px; fill: #0e0e10; }
+  .mic-btn {
+    position: absolute;
+    right: 56px;
+    width: 38px; height: 38px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .mic-btn:hover { border-color: var(--accent); }
+  .mic-btn svg { width: 16px; height: 16px; fill: var(--text-mid); transition: fill 0.2s; }
+  .mic-btn:hover svg { fill: var(--accent); }
+  .mic-btn.gravando {
+    background: rgba(255,92,92,0.15);
+    border-color: var(--danger);
+    animation: pulsar 1s infinite;
+  }
+  .mic-btn.gravando svg { fill: var(--danger); }
+  @keyframes pulsar {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,92,92,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(255,92,92,0); }
+  }
   .input-hint {
     margin-top: 8px;
     font-size: 11px;
@@ -382,6 +409,9 @@
       placeholder='ex: "padaria 47" ou "total do mês"'
       autocomplete="off"
     />
+    <button class="mic-btn" id="mic-btn" onclick="alternarMic()" title="Falar">
+      <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-1 3a1 1 0 0 1 2 0v8a1 1 0 0 1-2 0V4zM7 11a5 5 0 0 0 10 0h2a7 7 0 0 1-6 6.92V21h-2v-3.08A7 7 0 0 1 5 11h2z"/></svg>
+    </button>
     <button class="send-btn" id="send-btn" onclick="processar()">
       <svg viewBox="0 0 16 16"><path d="M14 8L2 2l2.5 6L2 14l12-6z"/></svg>
     </button>
@@ -625,6 +655,49 @@ Regras:
     esconderProcessando();
     mostrarConsulta('Erro de conexão. Verifique sua internet.');
   }
+}
+
+let reconhecimento = null;
+let gravando = false;
+
+function alternarMic() {
+  if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+    mostrarConsulta("Seu navegador não suporta voz. Use Chrome ou Edge.");
+    return;
+  }
+  if (gravando) {
+    reconhecimento.stop();
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  reconhecimento = new SR();
+  reconhecimento.lang = "pt-BR";
+  reconhecimento.interimResults = false;
+  reconhecimento.maxAlternatives = 1;
+  reconhecimento.onstart = () => {
+    gravando = true;
+    document.getElementById("mic-btn").classList.add("gravando");
+    document.getElementById("processing-text").textContent = "ouvindo...";
+    document.getElementById("processing").classList.add("show");
+  };
+  reconhecimento.onresult = (e) => {
+    const texto = e.results[0][0].transcript;
+    document.getElementById("gasto-input").value = texto;
+  };
+  reconhecimento.onend = () => {
+    gravando = false;
+    document.getElementById("mic-btn").classList.remove("gravando");
+    document.getElementById("processing").classList.remove("show");
+    const texto = document.getElementById("gasto-input").value.trim();
+    if (texto) processar();
+  };
+  reconhecimento.onerror = () => {
+    gravando = false;
+    document.getElementById("mic-btn").classList.remove("gravando");
+    document.getElementById("processing").classList.remove("show");
+    mostrarConsulta("Não consegui ouvir. Tente novamente.");
+  };
+  reconhecimento.start();
 }
 
 document.getElementById('gasto-input').addEventListener('keydown', e => {
