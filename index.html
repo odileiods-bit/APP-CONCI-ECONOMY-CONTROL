@@ -29,6 +29,12 @@
     --cat-lazer: #a78bfa;
     --cat-casa: #ffb830;
     --cat-outros: #6b6b78;
+    --cat-educacao: #38bdf8;
+    --cat-tecnologia: #818cf8;
+    --cat-vestuario: #fb923c;
+    --cat-pets: #34d399;
+    --cat-viagem: #f59e0b;
+    --cat-servicos: #94a3b8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -410,6 +416,12 @@ const CAT_COLORS = {
   'lazer':       '#a78bfa',
   'casa':        '#ffb830',
   'outros':      '#6b6b78',
+  'educação':    '#38bdf8',
+  'tecnologia':  '#818cf8',
+  'vestuário':   '#fb923c',
+  'pets':        '#34d399',
+  'viagem':      '#f59e0b',
+  'serviços':    '#94a3b8',
 };
 
 let gastos = [];
@@ -544,7 +556,19 @@ async function processar() {
     ? `Você é um assistente de finanças pessoais. Responda perguntas sobre os gastos do usuário de forma direta e clara em português. Use os dados fornecidos. Seja conciso, máximo 3 linhas. Use R$ com valores formatados. Hoje é ${agora.toLocaleDateString('pt-BR')}.`
     : `Você é um parser de gastos financeiros. O usuário vai descrever um gasto em linguagem natural. Extraia as informações e retorne SOMENTE um JSON válido no formato:
 {"valor": 0.00, "descricao": "descrição limpa", "categoria": "uma das opções"}
-Categorias disponíveis: alimentação, transporte, saúde, lazer, casa, outros.
+Categorias disponíveis e exemplos:
+- alimentação: mercado, padaria, restaurante, lanche, feira, açougue, café
+- transporte: gasolina, uber, ônibus, estacionamento, metrô, pedágio, moto
+- saúde: farmácia, médico, dentista, academia, exame, plano de saúde
+- lazer: cinema, bar, festa, show, jogo, passeio, diversão
+- casa: aluguel, energia, água, internet, reforma, móveis, limpeza
+- educação: curso, aula, escola, faculdade, livro, material escolar, treinamento, mensalidade escolar
+- tecnologia: celular, computador, software, aplicativo, Netflix, Spotify, assinatura digital, streaming
+- vestuário: roupa, calçado, tênis, camisa, calça, acessório
+- pets: ração, veterinário, banho pet, remédio animal
+- viagem: hotel, passagem, hospedagem, turismo, mala
+- serviços: cabeleireiro, conserto, manutenção, lavanderia, entrega
+- outros: qualquer coisa que não se encaixe nas categorias acima
 Regras:
 - valor deve ser um número float
 - descricao deve ser curta e limpa (máximo 30 chars)
