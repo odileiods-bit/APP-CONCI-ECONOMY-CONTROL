@@ -439,6 +439,7 @@
 
 <script>
 const STORAGE_KEY = 'falou_lancou_gastos_v1';
+const PARCELAS_KEY = 'falou_lancou_parcelas_v1';
 const CAT_COLORS = {
   'alimentação': '#00e5a0',
   'transporte':  '#4d9fff',
@@ -455,12 +456,54 @@ const CAT_COLORS = {
 };
 
 let gastos = [];
+let parcelasFuturas = [];
+
+function loadParcelas() {
+  try {
+    const raw = localStorage.getItem(PARCELAS_KEY);
+    if (raw) parcelasFuturas = JSON.parse(raw);
+  } catch(e) { parcelasFuturas = []; }
+}
+function saveParcelas() {
+  localStorage.setItem(PARCELAS_KEY, JSON.stringify(parcelasFuturas));
+}
+function verificarParcelasDoMes() {
+  const agora = new Date();
+  const chave = `${agora.getFullYear()}-${agora.getMonth()}`;
+  const jaProcessado = localStorage.getItem('falou_parcelas_processadas_' + chave);
+  if (jaProcessado) return;
+  const vencendo = parcelasFuturas.filter(p => {
+    const d = new Date(p.vencimento);
+    return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
+  });
+  vencendo.forEach(p => {
+    gastos.push({
+      id: Date.now().toString() + Math.random(),
+      valor: p.valor,
+      descricao: p.descricao,
+      categoria: p.categoria,
+      ts: new Date(p.vencimento).setDate(1),
+      parcelaInfo: p.parcelaInfo
+    });
+  });
+  parcelasFuturas = parcelasFuturas.filter(p => {
+    const d = new Date(p.vencimento);
+    return !(d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear());
+  });
+  if (vencendo.length > 0) {
+    saveGastos();
+    saveParcelas();
+  }
+  localStorage.setItem('falou_parcelas_processadas_' + chave, '1');
+}
 
 function loadGastos() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) gastos = JSON.parse(raw);
   } catch(e) { gastos = []; }
+  loadParcelas();
+  verificarParcelasDoMes();
 }
 function saveGastos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos));
@@ -516,7 +559,7 @@ function renderHistorico() {
     <div class="gasto-item" id="item-${g.id}">
       <div class="gasto-cat-bar" style="background:${cor}"></div>
       <div class="gasto-info">
-        <div class="gasto-desc">${g.descricao}</div>
+        <div class="gasto-desc">${g.descricao}${g.parcelaInfo ? ` <span style="font-size:10px;opacity:0.6">(${g.parcelaInfo})</span>` : ''}</div>
         <div class="gasto-meta">
           <span class="gasto-cat-tag" style="color:${cor}">${g.categoria}</span>
           <span class="gasto-time">${formatHora(g.ts)}</span>
@@ -571,21 +614,29 @@ async function processar() {
   input.value = '';
   esconderConsulta();
 
-  const ehConsulta = /total|quanto|histórico|gastei|resumo|listar|mostrar|hoje|mês|semana|categoria/i.test(texto);
+  const ehConsulta = /total|quanto|histórico|gastei|resumo|listar|mostrar|hoje|mês|semana|categoria|devo|parcela|junho|julho|agosto|setembro|outubro|novembro|dezembro|janeiro|fevereiro|março|abril|maio|próximo|futuro/i.test(texto);
 
   mostrarProcessando(ehConsulta ? 'consultando...' : 'entendendo gasto...');
 
   const agora = new Date();
   const historicoTexto = gastos.length > 0
     ? gastos.slice(-20).map(g =>
-        `- ${new Date(g.ts).toLocaleDateString('pt-BR')}: ${g.descricao} · R$ ${g.valor.toFixed(2)} · ${g.categoria}`
+        `- ${new Date(g.ts).toLocaleDateString('pt-BR')}: ${g.descricao}${g.parcelaInfo ? ' ('+g.parcelaInfo+')' : ''} · R$ ${g.valor.toFixed(2)} · ${g.categoria}`
       ).join('\n')
     : 'nenhum gasto registrado ainda';
+  const parcelasTexto = parcelasFuturas.length > 0
+    ? '\nParcelas agendadas nos próximos meses:\n' + parcelasFuturas.map(p =>
+        `- ${new Date(p.vencimento).toLocaleDateString('pt-BR', {month:'long',year:'numeric'})}: ${p.descricao} (${p.parcelaInfo}) · R$ ${p.valor.toFixed(2)} · ${p.categoria}`
+      ).join('\n')
+    : '';
 
   const systemPrompt = ehConsulta
     ? `Você é um assistente de finanças pessoais. Responda perguntas sobre os gastos do usuário de forma direta e clara em português. Use os dados fornecidos. Seja conciso, máximo 3 linhas. Use R$ com valores formatados. Hoje é ${agora.toLocaleDateString('pt-BR')}.`
     : `Você é um parser de gastos financeiros. O usuário vai descrever um gasto em linguagem natural. Extraia as informações e retorne SOMENTE um JSON válido no formato:
-{"valor": 0.00, "descricao": "descrição limpa", "categoria": "uma das opções"}
+{"valor": 0.00, "descricao": "descrição limpa", "categoria": "uma das opções", "parcelas": null}
+Se o usuário mencionar parcelamento (ex: "6x", "em 6 vezes", "parcelado em 3x"), retorne:
+{"valor": 0.00, "descricao": "descrição limpa", "categoria": "uma das opções", "parcelas": 6}
+Onde valor é o valor TOTAL da compra e parcelas é o número de parcelas.
 Categorias disponíveis e exemplos:
 - alimentação: mercado, padaria, restaurante, lanche, feira, açougue, café
 - transporte: gasolina, uber, ônibus, estacionamento, metrô, pedágio, moto
@@ -606,7 +657,7 @@ Regras:
 - NÃO retorne nada além do JSON puro, sem markdown, sem explicação`;
 
   const userMessage = ehConsulta
-    ? `Meus gastos:\n${historicoTexto}\n\nPergunta: ${texto}`
+    ? `Meus gastos:\n${historicoTexto}${parcelasTexto}\n\nPergunta: ${texto}`
     : texto;
 
   try {
@@ -633,14 +684,35 @@ Regras:
         const clean = respText.replace(/```json|```/g, '').trim();
         const parsed = JSON.parse(clean);
         if (parsed.valor && parsed.descricao && parsed.categoria) {
+          const valorTotal = parseFloat(parsed.valor);
+          const numParcelas = parsed.parcelas ? parseInt(parsed.parcelas) : 1;
+          const valorParcela = numParcelas > 1 ? valorTotal / numParcelas : valorTotal;
+          const parcelaInfo = numParcelas > 1 ? `parcela 1/${numParcelas}` : null;
           const novoGasto = {
             id: Date.now().toString(),
-            valor: parseFloat(parsed.valor),
+            valor: valorParcela,
             descricao: parsed.descricao,
             categoria: parsed.categoria.toLowerCase(),
-            ts: Date.now()
+            ts: Date.now(),
+            parcelaInfo: parcelaInfo
           };
           gastos.push(novoGasto);
+          if (numParcelas > 1) {
+            const agora = new Date();
+            for (let i = 1; i < numParcelas; i++) {
+              const venc = new Date(agora.getFullYear(), agora.getMonth() + i, 1);
+              parcelasFuturas.push({
+                id: Date.now().toString() + i,
+                valor: valorParcela,
+                descricao: parsed.descricao,
+                categoria: parsed.categoria.toLowerCase(),
+                vencimento: venc.toISOString(),
+                parcelaInfo: `parcela ${i+1}/${numParcelas}`
+              });
+            }
+            saveParcelas();
+            mostrarConsulta(`✓ ${parsed.descricao} — R$ ${valorParcela.toFixed(2)}/mês por ${numParcelas}x. Parcelas agendadas!`);
+          }
           saveGastos();
           atualizarTotal();
           renderHistorico();
