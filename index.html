@@ -223,6 +223,10 @@
  
  
   /* FILTRO DE MÊS */
+  @keyframes filtroPulso {
+    0%,100% { background: rgba(0,229,160,0.06); border-color: rgba(0,229,160,0.20); }
+    50%      { background: rgba(0,229,160,0.14); border-color: rgba(0,229,160,0.50); }
+  }
   .filtro-bar {
     display: none;
     align-items: center;
@@ -252,6 +256,138 @@
     transition: all 0.2s;
   }
   .filtro-remover:hover { color: var(--accent); border-color: var(--accent); }
+  .filtro-bar.visivel .filtro-remover { animation: filtroPulso 2.4s ease-in-out infinite; }
+  @keyframes filtroPulso {
+    0%,100% { border-color: var(--border); color: var(--text-muted); }
+    50%      { border-color: var(--accent); color: var(--accent); }
+  }
+ 
+ 
+  /* BOTÃO EXPORTAR PDF */
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 12px auto 0;
+  }
+  .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .export-btn svg { width: 13px; height: 13px; fill: currentColor; }
+ 
+  /* MODAL DE SELEÇÃO */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.visivel { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .modal-title {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .mes-opcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+  .mes-opcao {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .mes-opcao:hover { border-color: var(--accent); }
+  .mes-opcao.selecionado { border-color: var(--accent); background: rgba(0,229,160,0.08); }
+  .mes-opcao-check {
+    width: 16px; height: 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .mes-opcao.selecionado .mes-opcao-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .mes-opcao.selecionado .mes-opcao-check::after {
+    content: '✓';
+    font-size: 10px;
+    color: #0e0e10;
+    font-weight: 700;
+  }
+  .mes-opcao-info { flex: 1; }
+  .mes-opcao-nome {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-light);
+  }
+  .mes-opcao-total {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .modal-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .modal-btn-cancel:hover { border-color: var(--text-muted); }
+  .modal-btn-gerar {
+    background: var(--accent);
+    border: none;
+    color: #0e0e10;
+    font-weight: 700;
+  }
+  .modal-btn-gerar:hover { opacity: 0.9; }
+  .modal-btn-gerar:disabled { opacity: 0.4; cursor: not-allowed; }
  
   /* GRÁFICO DE ROSCA */
   .grafico-wrap {
@@ -509,6 +645,24 @@
   <span>histórico</span>
   <button class="clear-btn" onclick="limparTudo()">limpar tudo</button>
 </div>
+ 
+<button class="export-btn" onclick="abrirModalPDF()">
+  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8 17v-1h8v1H8zm0-3v-1h8v1H8zm0-3v-1h5v1H8z"/></svg>
+  exportar PDF
+</button>
+ 
+<!-- MODAL PDF -->
+<div class="modal-overlay" id="modal-pdf">
+  <div class="modal-box">
+    <div class="modal-title">exportar relatório</div>
+    <div class="mes-opcoes" id="mes-opcoes"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="fecharModalPDF()">cancelar</button>
+      <button class="modal-btn modal-btn-gerar" id="btn-gerar-pdf" onclick="gerarPDF()" disabled>gerar PDF</button>
+    </div>
+  </div>
+</div>
+ 
 <div class="history-list" id="history-list">
   <div class="empty-state">nenhum gasto registrado ainda</div>
 </div>
@@ -1019,6 +1173,151 @@ Regras:
   }
 }
  
+// ── PDF ──────────────────────────────────────────────────────────
+let mesesSelecionados = new Set();
+ 
+function getMesesComGastos() {
+  const mapa = {};
+  gastos.forEach(g => {
+    const d = new Date(g.ts);
+    const chave = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+    if (!mapa[chave]) mapa[chave] = { ano: d.getFullYear(), mes: d.getMonth(), total: 0, qtd: 0 };
+    mapa[chave].total += g.valor;
+    mapa[chave].qtd++;
+  });
+  parcelasFuturas.forEach(p => {
+    const d = new Date(p.vencimento);
+    const chave = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+    if (!mapa[chave]) mapa[chave] = { ano: d.getFullYear(), mes: d.getMonth(), total: 0, qtd: 0 };
+    mapa[chave].total += p.valor;
+    mapa[chave].qtd++;
+  });
+  return Object.entries(mapa).sort((a,b) => b[0].localeCompare(a[0])).map(([k,v]) => ({...v, chave: k}));
+}
+ 
+function abrirModalPDF() {
+  mesesSelecionados.clear();
+  const meses = getMesesComGastos();
+  const container = document.getElementById('mes-opcoes');
+  if (meses.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:16px">nenhum gasto registrado ainda</div>';
+    document.getElementById('btn-gerar-pdf').disabled = true;
+  } else {
+    container.innerHTML = meses.map(m => {
+      const nomeMes = new Date(m.ano, m.mes, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      return `<div class="mes-opcao" onclick="toggleMes('${m.chave}', this)">
+        <div class="mes-opcao-check"></div>
+        <div class="mes-opcao-info">
+          <div class="mes-opcao-nome">${nomeMes}</div>
+          <div class="mes-opcao-total">${m.qtd} lançamento${m.qtd>1?'s':''} · R$ ${formatMoeda(m.total)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('btn-gerar-pdf').disabled = true;
+  }
+  document.getElementById('modal-pdf').classList.add('visivel');
+}
+ 
+function fecharModalPDF() {
+  document.getElementById('modal-pdf').classList.remove('visivel');
+}
+ 
+function toggleMes(chave, el) {
+  if (mesesSelecionados.has(chave)) {
+    mesesSelecionados.delete(chave);
+    el.classList.remove('selecionado');
+  } else {
+    mesesSelecionados.add(chave);
+    el.classList.add('selecionado');
+  }
+  document.getElementById('btn-gerar-pdf').disabled = mesesSelecionados.size === 0;
+}
+ 
+function gerarPDF() {
+  fecharModalPDF();
+  const mesesOrdenados = [...mesesSelecionados].sort();
+  let conteudo = '';
+ 
+  mesesOrdenados.forEach(chave => {
+    const [ano, mesIdx] = chave.split('-').map(Number);
+    const nomeMes = new Date(ano, mesIdx, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+ 
+    const gastosDoMes = gastos.filter(g => {
+      const d = new Date(g.ts);
+      return d.getMonth() === mesIdx && d.getFullYear() === ano;
+    });
+    const parcelasDoMes = parcelasFuturas.filter(p => {
+      const d = new Date(p.vencimento);
+      return d.getMonth() === mesIdx && d.getFullYear() === ano;
+    }).map(p => ({...p, ts: new Date(p.vencimento).getTime(), _agendado: true}));
+ 
+    const todos = [...gastosDoMes, ...parcelasDoMes].sort((a,b) => a.ts - b.ts);
+    const total = todos.reduce((s,g) => s + g.valor, 0);
+ 
+    const porCat = {};
+    todos.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
+    const catHtml = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).map(([cat, val]) =>
+      `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:#f5f5f5;border-radius:999px;font-size:11px;margin:2px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${CAT_COLORS[cat]||'#999'};display:inline-block"></span>
+        ${cat} · R$ ${formatMoeda(val)}
+      </span>`
+    ).join('');
+ 
+    const itensHtml = todos.map(g =>
+      `<tr>
+        <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#222">
+          ${g.descricao}${g.parcelaInfo ? ` <span style="font-size:10px;color:#999">(${g.parcelaInfo})</span>` : ''}
+          ${g._agendado ? '<span style="font-size:9px;color:#aaa;margin-left:4px">agendado</span>' : ''}
+        </td>
+        <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:11px;color:#888">${g.categoria}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#222;text-align:right;font-weight:600">R$ ${formatMoeda(g.valor)}</td>
+      </tr>`
+    ).join('');
+ 
+    conteudo += `
+      <div style="page-break-after:always;padding:32px 40px;max-width:700px;margin:0 auto">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+          <span style="font-family:monospace;font-size:22px;font-weight:700;color:#111">falou, lançou</span>
+          <span style="font-size:12px;color:#aaa;font-family:monospace">// relatório</span>
+        </div>
+        <div style="font-size:13px;color:#888;font-family:monospace;margin-bottom:24px;text-transform:uppercase;letter-spacing:1px">${nomeMes}</div>
+ 
+        <div style="background:#f9f9f9;border-radius:12px;padding:20px;margin-bottom:20px">
+          <div style="font-size:11px;color:#aaa;font-family:monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">total do mês</div>
+          <div style="font-size:32px;font-weight:700;color:#111;font-family:monospace">R$ ${formatMoeda(total)}</div>
+          <div style="font-size:12px;color:#999;margin-top:6px">${todos.length} lançamento${todos.length>1?'s':''}</div>
+          <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:4px">${catHtml}</div>
+        </div>
+ 
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="background:#f5f5f5">
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">descrição</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">categoria</th>
+              <th style="padding:8px 12px;text-align:right;font-size:10px;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">valor</th>
+            </tr>
+          </thead>
+          <tbody>${itensHtml}</tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="padding:10px 12px;font-size:12px;font-weight:700;color:#111;border-top:2px solid #222">total</td>
+              <td style="padding:10px 12px;text-align:right;font-size:14px;font-weight:700;color:#111;border-top:2px solid #222">R$ ${formatMoeda(total)}</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div style="margin-top:32px;font-size:10px;color:#ccc;font-family:monospace;text-align:center">gerado por falou, lançou · ${new Date().toLocaleDateString('pt-BR')}</div>
+      </div>`;
+  });
+ 
+  const janela = window.open('', '_blank');
+  janela.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Falou, Lançou</title>
+    <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:#fff}
+    @media print{@page{margin:0}}</style></head><body>${conteudo}
+    <script>window.onload=()=>{window.print()}<\/script></body></html>`);
+  janela.document.close();
+}
+// ── FIM PDF ───────────────────────────────────────────────────────
+ 
 let reconhecimento = null;
 let gravando = false;
  
@@ -1072,4 +1371,3 @@ renderHistorico();
 </script>
 </body>
 </html>
- 
