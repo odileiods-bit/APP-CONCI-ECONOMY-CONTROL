@@ -46,7 +46,7 @@
     flex-direction: column;
     align-items: center;
   }
-
+ 
   /* HEADER */
   header {
     width: 100%;
@@ -69,7 +69,7 @@
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.5px;
   }
-
+ 
   /* TOTAL CARD */
   .total-card {
     width: 100%;
@@ -139,7 +139,7 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
-
+ 
   /* INPUT AREA */
   .input-area {
     width: 100%;
@@ -219,7 +219,43 @@
     font-family: 'DM Mono', monospace;
     padding: 0 4px;
   }
-
+ 
+ 
+  /* GRÁFICO DE ROSCA */
+  .grafico-wrap {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    gap: 12px;
+  }
+  .grafico-wrap.visivel { display: flex; }
+  .grafico-svg { overflow: visible; }
+  .grafico-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 340px;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .leg-item.destaques { opacity: 1; }
+  .leg-item.apagado { opacity: 0.25; }
+  .leg-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+ 
   /* ESTADO DE PROCESSAMENTO */
   .processing {
     display: none;
@@ -248,7 +284,7 @@
     0%,60%,100% { transform: translateY(0); opacity: 0.4; }
     30% { transform: translateY(-4px); opacity: 1; }
   }
-
+ 
   /* HISTÓRICO */
   .section-label {
     width: 100%;
@@ -276,7 +312,7 @@
     transition: color 0.2s, background 0.2s;
   }
   .clear-btn:hover { color: var(--danger); background: rgba(255,92,92,0.08); }
-
+ 
   .history-list {
     width: 100%;
     max-width: 480px;
@@ -361,7 +397,7 @@
   }
   .delete-btn:hover { color: var(--danger); }
   .delete-btn svg { width: 14px; height: 14px; }
-
+ 
   /* CONSULTA RESPOSTA */
   .consulta-resp {
     display: none;
@@ -384,12 +420,12 @@
 </style>
 </head>
 <body>
-
+ 
 <header>
   <div class="logo">falou<span>,</span> lançou</div>
   <div class="tagline">// beta</div>
 </header>
-
+ 
 <!-- TOTAL -->
 <div class="total-card" style="max-width:480px;width:calc(100% - 40px)">
   <div class="total-label">total do mês</div>
@@ -398,8 +434,12 @@
   </div>
   <div class="total-period" id="total-period">nenhum gasto ainda</div>
   <div class="cats-row" id="cats-row"></div>
+  <div class="grafico-wrap" id="grafico-wrap">
+    <svg class="grafico-svg" id="grafico-svg" width="180" height="180" viewBox="0 0 180 180"></svg>
+    <div class="grafico-legenda" id="grafico-legenda"></div>
+  </div>
 </div>
-
+ 
 <!-- INPUT -->
 <div class="input-area">
   <div class="input-wrap">
@@ -422,12 +462,12 @@
     <span id="processing-text">processando...</span>
   </div>
 </div>
-
+ 
 <!-- RESPOSTA CONSULTA -->
 <div class="consulta-resp" id="consulta-resp">
   <div class="consulta-card" id="consulta-card"></div>
 </div>
-
+ 
 <!-- HISTÓRICO -->
 <div class="section-label">
   <span>histórico</span>
@@ -436,7 +476,7 @@
 <div class="history-list" id="history-list">
   <div class="empty-state">nenhum gasto registrado ainda</div>
 </div>
-
+ 
 <script>
 const STORAGE_KEY = 'falou_lancou_gastos_v1';
 const PARCELAS_KEY = 'falou_lancou_parcelas_v1';
@@ -454,10 +494,10 @@ const CAT_COLORS = {
   'viagem':      '#f59e0b',
   'serviços':    '#94a3b8',
 };
-
+ 
 let gastos = [];
 let parcelasFuturas = [];
-
+ 
 function loadParcelas() {
   try {
     const raw = localStorage.getItem(PARCELAS_KEY);
@@ -496,7 +536,7 @@ function verificarParcelasDoMes() {
   }
   localStorage.setItem('falou_parcelas_processadas_' + chave, '1');
 }
-
+ 
 function loadGastos() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -508,7 +548,7 @@ function loadGastos() {
 function saveGastos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos));
 }
-
+ 
 function formatMoeda(v) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -517,7 +557,85 @@ function formatHora(ts) {
   return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) +
     ' ' + d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
 }
-
+ 
+ 
+function desenharGrafico(porCat, total, destaque) {
+  const svg = document.getElementById('grafico-svg');
+  const legDiv = document.getElementById('grafico-legenda');
+  const wrap = document.getElementById('grafico-wrap');
+ 
+  if (!porCat || Object.keys(porCat).length === 0) {
+    wrap.classList.remove('visivel');
+    return;
+  }
+  wrap.classList.add('visivel');
+ 
+  const cx = 90, cy = 90, r = 70, espessura = 28;
+  const ri = r - espessura;
+  const entradas = Object.entries(porCat).sort((a,b) => b[1]-a[1]);
+ 
+  let angulo = -Math.PI / 2;
+  let paths = '';
+ 
+  entradas.forEach(([cat, val]) => {
+    const fatia = (val / total) * 2 * Math.PI;
+    const aFim = angulo + fatia;
+    const x1 = cx + r * Math.cos(angulo);
+    const y1 = cy + r * Math.sin(angulo);
+    const x2 = cx + r * Math.cos(aFim);
+    const y2 = cy + r * Math.sin(aFim);
+    const xi1 = cx + ri * Math.cos(aFim);
+    const yi1 = cy + ri * Math.sin(aFim);
+    const xi2 = cx + ri * Math.cos(angulo);
+    const yi2 = cy + ri * Math.sin(angulo);
+    const arcoGrande = fatia > Math.PI ? 1 : 0;
+    const cor = CAT_COLORS[cat] || CAT_COLORS['outros'];
+    const isDestaque = destaque && cat === destaque;
+    const opacidade = destaque ? (isDestaque ? 1 : 0.2) : 1;
+    const escala = isDestaque ? 'scale(1.04)' : 'scale(1)';
+    const d = `M ${x1} ${y1} A ${r} ${r} 0 ${arcoGrande} 1 ${x2} ${y2} L ${xi1} ${yi1} A ${ri} ${ri} 0 ${arcoGrande} 0 ${xi2} ${yi2} Z`;
+    paths += `<path d="${d}" fill="${cor}" opacity="${opacidade}" style="transform-origin:${cx}px ${cy}px;transform:${escala};transition:all 0.3s" />`;
+    angulo = aFim;
+  });
+ 
+  // Texto central
+  const labelCentro = destaque ? destaque : '';
+  const pct = destaque && porCat[destaque] ? Math.round((porCat[destaque]/total)*100) : '';
+  paths += `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="11" fill="var(--text-muted)" font-family="DM Mono,monospace">${labelCentro}</text>`;
+  paths += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="18" font-weight="700" fill="var(--accent)" font-family="DM Mono,monospace">${pct ? pct+'%' : ''}</text>`;
+ 
+  svg.innerHTML = paths;
+ 
+  // Legenda
+  legDiv.innerHTML = entradas.map(([cat, val]) => {
+    const cor = CAT_COLORS[cat] || CAT_COLORS['outros'];
+    const cls = destaque ? (cat === destaque ? 'leg-item destaques' : 'leg-item apagado') : 'leg-item';
+    return `<div class="${cls}" onclick="destacarCategoria('${cat}')">
+      <div class="leg-dot" style="background:${cor}"></div>
+      ${cat}
+    </div>`;
+  }).join('');
+}
+ 
+let categoriaDestacada = null;
+function destacarCategoria(cat) {
+  const agora = new Date();
+  const mesAtual = gastos.filter(g => {
+    const d = new Date(g.ts);
+    return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
+  });
+  const total = mesAtual.reduce((s, g) => s + g.valor, 0);
+  const porCat = {};
+  mesAtual.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
+  if (categoriaDestacada === cat) {
+    categoriaDestacada = null;
+    desenharGrafico(porCat, total, null);
+  } else {
+    categoriaDestacada = cat;
+    desenharGrafico(porCat, total, cat);
+  }
+}
+ 
 function atualizarTotal() {
   const agora = new Date();
   const mesAtual = gastos.filter(g => {
@@ -526,15 +644,16 @@ function atualizarTotal() {
   });
   const total = mesAtual.reduce((s, g) => s + g.valor, 0);
   document.getElementById('total-num').textContent = formatMoeda(total);
-
+ 
   if (mesAtual.length === 0) {
     document.getElementById('total-period').textContent = 'nenhum gasto ainda';
     document.getElementById('cats-row').innerHTML = '';
+    document.getElementById('grafico-wrap').classList.remove('visivel');
     return;
   }
   const mes = agora.toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
   document.getElementById('total-period').textContent = `${mesAtual.length} lançamento${mesAtual.length>1?'s':''} em ${mes}`;
-
+ 
   const porCat = {};
   mesAtual.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
   const html = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).map(([cat, val]) =>
@@ -544,8 +663,9 @@ function atualizarTotal() {
     </div>`
   ).join('');
   document.getElementById('cats-row').innerHTML = html;
+  desenharGrafico(porCat, total, categoriaDestacada);
 }
-
+ 
 function renderHistorico() {
   const list = document.getElementById('history-list');
   if (gastos.length === 0) {
@@ -572,14 +692,14 @@ function renderHistorico() {
     </div>`;
   }).join('');
 }
-
+ 
 function deletarGasto(id) {
   gastos = gastos.filter(g => g.id !== id);
   saveGastos();
   atualizarTotal();
   renderHistorico();
 }
-
+ 
 function limparTudo() {
   if (!confirm('Apagar todos os gastos?')) return;
   gastos = [];
@@ -588,7 +708,7 @@ function limparTudo() {
   renderHistorico();
   esconderConsulta();
 }
-
+ 
 function mostrarProcessando(texto) {
   const el = document.getElementById('processing');
   document.getElementById('processing-text').textContent = texto || 'processando...';
@@ -606,18 +726,18 @@ function mostrarConsulta(texto) {
 function esconderConsulta() {
   document.getElementById('consulta-resp').classList.remove('show');
 }
-
+ 
 async function processar() {
   const input = document.getElementById('gasto-input');
   const texto = input.value.trim();
   if (!texto) return;
   input.value = '';
   esconderConsulta();
-
+ 
   const ehConsulta = /total|quanto|histórico|gastei|resumo|listar|mostrar|hoje|mês|semana|categoria|devo|parcela|junho|julho|agosto|setembro|outubro|novembro|dezembro|janeiro|fevereiro|março|abril|maio|próximo|futuro/i.test(texto);
-
+ 
   mostrarProcessando(ehConsulta ? 'consultando...' : 'entendendo gasto...');
-
+ 
   const agora = new Date();
   const historicoTexto = gastos.length > 0
     ? gastos.slice(-20).map(g =>
@@ -629,7 +749,7 @@ async function processar() {
         `- ${new Date(p.vencimento).toLocaleDateString('pt-BR', {month:'long',year:'numeric'})}: ${p.descricao} (${p.parcelaInfo}) · R$ ${p.valor.toFixed(2)} · ${p.categoria}`
       ).join('\n')
     : '';
-
+ 
   const systemPrompt = ehConsulta
     ? `Você é um assistente de finanças pessoais. Responda perguntas sobre os gastos do usuário de forma direta e clara em português. Use os dados fornecidos. Seja conciso, máximo 3 linhas. Use R$ com valores formatados. Hoje é ${agora.toLocaleDateString('pt-BR')}.`
     : `Você é um parser de gastos financeiros. O usuário vai descrever um gasto em linguagem natural. Extraia as informações e retorne SOMENTE um JSON válido no formato:
@@ -655,11 +775,11 @@ Regras:
 - descricao deve ser curta e limpa (máximo 30 chars)
 - categoria deve ser exatamente uma das opções listadas
 - NÃO retorne nada além do JSON puro, sem markdown, sem explicação`;
-
+ 
   const userMessage = ehConsulta
     ? `Meus gastos:\n${historicoTexto}${parcelasTexto}\n\nPergunta: ${texto}`
     : texto;
-
+ 
   try {
     const resp = await fetch('https://soft-mode-5249.odileiods.workers.dev', {
       method: 'POST',
@@ -671,14 +791,29 @@ Regras:
         messages: [{ role: 'user', content: userMessage }]
       })
     });
-
+ 
     const data = await resp.json();
     const respText = data.content?.map(c => c.text || '').join('').trim();
-
+ 
     esconderProcessando();
-
+ 
     if (ehConsulta) {
       mostrarConsulta(respText);
+      // Tentar detectar categoria mencionada e destacar no gráfico
+      const catsDetect = Object.keys(CAT_COLORS);
+      const catEncontrada = catsDetect.find(c => texto.toLowerCase().includes(c));
+      if (catEncontrada) {
+        categoriaDestacada = catEncontrada;
+        const agora2 = new Date();
+        const mes2 = gastos.filter(g => {
+          const d = new Date(g.ts);
+          return d.getMonth() === agora2.getMonth() && d.getFullYear() === agora2.getFullYear();
+        });
+        const total2 = mes2.reduce((s, g) => s + g.valor, 0);
+        const porCat2 = {};
+        mes2.forEach(g => { porCat2[g.categoria] = (porCat2[g.categoria]||0) + g.valor; });
+        desenharGrafico(porCat2, total2, catEncontrada);
+      }
     } else {
       try {
         const clean = respText.replace(/```json|```/g, '').trim();
@@ -728,10 +863,10 @@ Regras:
     mostrarConsulta('Erro de conexão. Verifique sua internet.');
   }
 }
-
+ 
 let reconhecimento = null;
 let gravando = false;
-
+ 
 function alternarMic() {
   if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
     mostrarConsulta("Seu navegador não suporta voz. Use Chrome ou Edge.");
@@ -771,11 +906,11 @@ function alternarMic() {
   };
   reconhecimento.start();
 }
-
+ 
 document.getElementById('gasto-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') processar();
 });
-
+ 
 loadGastos();
 atualizarTotal();
 renderHistorico();
