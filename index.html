@@ -46,7 +46,7 @@
     flex-direction: column;
     align-items: center;
   }
- 
+
   /* HEADER */
   header {
     width: 100%;
@@ -69,7 +69,7 @@
     font-family: 'DM Mono', monospace;
     letter-spacing: 0.5px;
   }
- 
+
   /* TOTAL CARD */
   .total-card {
     width: 100%;
@@ -139,7 +139,7 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
- 
+
   /* INPUT AREA */
   .input-area {
     width: 100%;
@@ -219,9 +219,9 @@
     font-family: 'DM Mono', monospace;
     padding: 0 4px;
   }
- 
- 
- 
+
+
+
   /* FILTRO DE MÊS */
   @keyframes filtroPulso {
     0%,100% { background: rgba(0,229,160,0.06); border-color: rgba(0,229,160,0.20); }
@@ -261,8 +261,8 @@
     0%,100% { border-color: var(--border); color: var(--text-muted); }
     50%      { border-color: var(--accent); color: var(--accent); }
   }
- 
- 
+
+
   /* BOTÃO EXPORTAR PDF */
   @keyframes exportPulso {
     0%,100% { box-shadow: 0 0 0 0 rgba(0,229,160,0.4); }
@@ -290,7 +290,7 @@
   }
   .export-btn:hover { opacity: 0.85; }
   .export-btn svg { width: 15px; height: 15px; fill: currentColor; }
- 
+
   /* MODAL DE SELEÇÃO */
   .modal-overlay {
     display: none;
@@ -397,7 +397,7 @@
   }
   .modal-btn-gerar:hover { opacity: 0.9; }
   .modal-btn-gerar:disabled { opacity: 0.4; cursor: not-allowed; }
- 
+
   /* GRÁFICO DE ROSCA */
   .grafico-wrap {
     display: none;
@@ -432,7 +432,7 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
- 
+
   /* ESTADO DE PROCESSAMENTO */
   .processing {
     display: none;
@@ -461,7 +461,7 @@
     0%,60%,100% { transform: translateY(0); opacity: 0.4; }
     30% { transform: translateY(-4px); opacity: 1; }
   }
- 
+
   /* HISTÓRICO */
   .section-label {
     width: 100%;
@@ -489,7 +489,7 @@
     transition: color 0.2s, background 0.2s;
   }
   .clear-btn:hover { color: var(--danger); background: rgba(255,92,92,0.08); }
- 
+
   .history-list {
     width: 100%;
     max-width: 480px;
@@ -574,7 +574,7 @@
   }
   .delete-btn:hover { color: var(--danger); }
   .delete-btn svg { width: 14px; height: 14px; }
- 
+
   /* CONSULTA RESPOSTA */
   .consulta-resp {
     display: none;
@@ -597,12 +597,12 @@
 </style>
 </head>
 <body>
- 
+
 <header>
   <div class="logo">falou<span>,</span> lançou</div>
   <div class="tagline">// beta</div>
 </header>
- 
+
 <!-- TOTAL -->
 <div class="total-card" style="max-width:480px;width:calc(100% - 40px)">
   <div class="total-label" id="total-label">total do mês</div>
@@ -620,7 +620,7 @@
     <div class="grafico-legenda" id="grafico-legenda"></div>
   </div>
 </div>
- 
+
 <!-- INPUT -->
 <div class="input-area">
   <div class="input-wrap">
@@ -643,23 +643,23 @@
     <span id="processing-text">processando...</span>
   </div>
 </div>
- 
+
 <!-- RESPOSTA CONSULTA -->
 <div class="consulta-resp" id="consulta-resp">
   <div class="consulta-card" id="consulta-card"></div>
 </div>
- 
+
 <!-- HISTÓRICO -->
 <div class="section-label">
   <span>histórico</span>
   <button class="clear-btn" onclick="limparTudo()">limpar tudo</button>
 </div>
- 
+
 <button class="export-btn" onclick="abrirModalPDF()">
   <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8 17v-1h8v1H8zm0-3v-1h8v1H8zm0-3v-1h5v1H8z"/></svg>
   exportar PDF
 </button>
- 
+
 <!-- MODAL PDF -->
 <div class="modal-overlay" id="modal-pdf">
   <div class="modal-box">
@@ -671,11 +671,11 @@
     </div>
   </div>
 </div>
- 
+
 <div class="history-list" id="history-list">
   <div class="empty-state">nenhum gasto registrado ainda</div>
 </div>
- 
+
 <script>
 const STORAGE_KEY = 'falou_lancou_gastos_v1';
 const PARCELAS_KEY = 'falou_lancou_parcelas_v1';
@@ -693,10 +693,10 @@ const CAT_COLORS = {
   'viagem':      '#f59e0b',
   'serviços':    '#94a3b8',
 };
- 
+
 let gastos = [];
 let parcelasFuturas = [];
- 
+
 function loadParcelas() {
   try {
     const raw = localStorage.getItem(PARCELAS_KEY);
@@ -735,7 +735,7 @@ function verificarParcelasDoMes() {
   }
   localStorage.setItem('falou_parcelas_processadas_' + chave, '1');
 }
- 
+
 function loadGastos() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -747,7 +747,7 @@ function loadGastos() {
 function saveGastos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos));
 }
- 
+
 function formatMoeda(v) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -756,16 +756,16 @@ function formatHora(ts) {
   return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' }) +
     ' ' + d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
 }
- 
- 
+
+
 // ESTADO DO FILTRO
 let filtroAtivo = null; // { ano, mes } ou null
- 
+
 const MESES_PT = {
   'janeiro':1,'fevereiro':2,'março':3,'abril':4,'maio':5,'junho':6,
   'julho':7,'agosto':8,'setembro':9,'outubro':10,'novembro':11,'dezembro':12
 };
- 
+
 function detectarMesTexto(texto) {
   const t = texto.toLowerCase();
   for (const [nome, num] of Object.entries(MESES_PT)) {
@@ -785,7 +785,7 @@ function detectarMesTexto(texto) {
   }
   return null;
 }
- 
+
 function aplicarFiltro(filtro) {
   filtroAtivo = filtro;
   const nomeMes = new Date(filtro.ano, filtro.mes, 1)
@@ -795,7 +795,7 @@ function aplicarFiltro(filtro) {
   document.getElementById('total-label').textContent = `total · ${nomeMes}`;
   renderComFiltro(filtro);
 }
- 
+
 function removerFiltro() {
   filtroAtivo = null;
   document.getElementById('filtro-bar').classList.remove('visivel');
@@ -803,7 +803,7 @@ function removerFiltro() {
   atualizarTotal();
   renderHistorico();
 }
- 
+
 function renderComFiltro(filtro) {
   // Gastos reais do mês filtrado
   const gastosDoMes = gastos.filter(g => {
@@ -818,7 +818,7 @@ function renderComFiltro(filtro) {
   const todosItens = [...gastosDoMes, ...parcelasDoMes.map(p => ({
     ...p, ts: new Date(p.vencimento).getTime(), _agendado: true
   }))];
- 
+
   // Atualizar total card
   const total = todosItens.reduce((s, g) => s + g.valor, 0);
   document.getElementById('total-num').textContent = formatMoeda(total);
@@ -840,7 +840,7 @@ function renderComFiltro(filtro) {
     document.getElementById('cats-row').innerHTML = pillsHtml;
     desenharGrafico(porCat, total, categoriaDestacada);
   }
- 
+
   // Atualizar histórico
   const list = document.getElementById('history-list');
   if (todosItens.length === 0) {
@@ -869,26 +869,26 @@ function renderComFiltro(filtro) {
     </div>`;
   }).join('');
 }
- 
- 
+
+
 function desenharGrafico(porCat, total, destaque) {
   const svg = document.getElementById('grafico-svg');
   const legDiv = document.getElementById('grafico-legenda');
   const wrap = document.getElementById('grafico-wrap');
- 
+
   if (!porCat || Object.keys(porCat).length === 0) {
     wrap.classList.remove('visivel');
     return;
   }
   wrap.classList.add('visivel');
- 
+
   const cx = 90, cy = 90, r = 70, espessura = 28;
   const ri = r - espessura;
   const entradas = Object.entries(porCat).sort((a,b) => b[1]-a[1]);
- 
+
   let angulo = -Math.PI / 2;
   let paths = '';
- 
+
   entradas.forEach(([cat, val]) => {
     const fatia = (val / total) * 2 * Math.PI;
     const aFim = angulo + fatia;
@@ -909,15 +909,15 @@ function desenharGrafico(porCat, total, destaque) {
     paths += `<path d="${d}" fill="${cor}" opacity="${opacidade}" style="transform-origin:${cx}px ${cy}px;transform:${escala};transition:all 0.3s" />`;
     angulo = aFim;
   });
- 
+
   // Texto central
   const labelCentro = destaque ? destaque : '';
   const pct = destaque && porCat[destaque] ? Math.round((porCat[destaque]/total)*100) : '';
   paths += `<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="11" fill="var(--text-muted)" font-family="DM Mono,monospace">${labelCentro}</text>`;
   paths += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="18" font-weight="700" fill="var(--accent)" font-family="DM Mono,monospace">${pct ? pct+'%' : ''}</text>`;
- 
+
   svg.innerHTML = paths;
- 
+
   // Legenda
   legDiv.innerHTML = entradas.map(([cat, val]) => {
     const cor = CAT_COLORS[cat] || CAT_COLORS['outros'];
@@ -928,7 +928,7 @@ function desenharGrafico(porCat, total, destaque) {
     </div>`;
   }).join('');
 }
- 
+
 let categoriaDestacada = null;
 function destacarCategoria(cat) {
   const agora = new Date();
@@ -947,7 +947,7 @@ function destacarCategoria(cat) {
     desenharGrafico(porCat, total, cat);
   }
 }
- 
+
 function atualizarTotal() {
   const agora = new Date();
   const mesAtual = gastos.filter(g => {
@@ -956,7 +956,7 @@ function atualizarTotal() {
   });
   const total = mesAtual.reduce((s, g) => s + g.valor, 0);
   document.getElementById('total-num').textContent = formatMoeda(total);
- 
+
   if (mesAtual.length === 0) {
     document.getElementById('total-period').textContent = 'nenhum gasto ainda';
     document.getElementById('cats-row').innerHTML = '';
@@ -965,7 +965,7 @@ function atualizarTotal() {
   }
   const mes = agora.toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
   document.getElementById('total-period').textContent = `${mesAtual.length} lançamento${mesAtual.length>1?'s':''} em ${mes}`;
- 
+
   const porCat = {};
   mesAtual.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
   const html = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).map(([cat, val]) =>
@@ -977,7 +977,7 @@ function atualizarTotal() {
   document.getElementById('cats-row').innerHTML = html;
   desenharGrafico(porCat, total, categoriaDestacada);
 }
- 
+
 function renderHistorico() {
   const list = document.getElementById('history-list');
   if (gastos.length === 0) {
@@ -1004,14 +1004,14 @@ function renderHistorico() {
     </div>`;
   }).join('');
 }
- 
+
 function deletarGasto(id) {
   gastos = gastos.filter(g => g.id !== id);
   saveGastos();
   atualizarTotal();
   renderHistorico();
 }
- 
+
 function limparTudo() {
   if (!confirm('Apagar todos os gastos?')) return;
   gastos = [];
@@ -1020,7 +1020,7 @@ function limparTudo() {
   renderHistorico();
   esconderConsulta();
 }
- 
+
 function mostrarProcessando(texto) {
   const el = document.getElementById('processing');
   document.getElementById('processing-text').textContent = texto || 'processando...';
@@ -1038,18 +1038,18 @@ function mostrarConsulta(texto) {
 function esconderConsulta() {
   document.getElementById('consulta-resp').classList.remove('show');
 }
- 
+
 async function processar() {
   const input = document.getElementById('gasto-input');
   const texto = input.value.trim();
   if (!texto) return;
   input.value = '';
   esconderConsulta();
- 
+
   const ehConsulta = /total|quanto|histórico|gastei|resumo|listar|mostrar|hoje|mês|semana|categoria|devo|parcela|junho|julho|agosto|setembro|outubro|novembro|dezembro|janeiro|fevereiro|março|abril|maio|próximo|futuro/i.test(texto);
- 
+
   mostrarProcessando(ehConsulta ? 'consultando...' : 'entendendo gasto...');
- 
+
   const agora = new Date();
   const historicoTexto = gastos.length > 0
     ? gastos.slice(-20).map(g =>
@@ -1061,7 +1061,7 @@ async function processar() {
         `- ${new Date(p.vencimento).toLocaleDateString('pt-BR', {month:'long',year:'numeric'})}: ${p.descricao} (${p.parcelaInfo}) · R$ ${p.valor.toFixed(2)} · ${p.categoria}`
       ).join('\n')
     : '';
- 
+
   const systemPrompt = ehConsulta
     ? `Você é um assistente de finanças pessoais. Responda perguntas sobre os gastos do usuário de forma direta e clara em português. Use os dados fornecidos. Seja conciso, máximo 3 linhas. Use R$ com valores formatados. Hoje é ${agora.toLocaleDateString('pt-BR')}.`
     : `Você é um parser de gastos financeiros. O usuário vai descrever um gasto em linguagem natural. Extraia as informações e retorne SOMENTE um JSON válido no formato:
@@ -1087,11 +1087,11 @@ Regras:
 - descricao deve ser curta e limpa (máximo 30 chars)
 - categoria deve ser exatamente uma das opções listadas
 - NÃO retorne nada além do JSON puro, sem markdown, sem explicação`;
- 
+
   const userMessage = ehConsulta
     ? `Meus gastos:\n${historicoTexto}${parcelasTexto}\n\nPergunta: ${texto}`
     : texto;
- 
+
   try {
     const resp = await fetch('https://soft-mode-5249.odileiods.workers.dev', {
       method: 'POST',
@@ -1103,12 +1103,12 @@ Regras:
         messages: [{ role: 'user', content: userMessage }]
       })
     });
- 
+
     const data = await resp.json();
     const respText = data.content?.map(c => c.text || '').join('').trim();
- 
+
     esconderProcessando();
- 
+
     if (ehConsulta) {
       mostrarConsulta(respText);
       // Detectar mês mencionado e aplicar filtro
@@ -1181,10 +1181,10 @@ Regras:
     mostrarConsulta('Erro de conexão. Verifique sua internet.');
   }
 }
- 
+
 // ── PDF ──────────────────────────────────────────────────────────
 let mesesSelecionados = new Set();
- 
+
 function getMesesComGastos() {
   const mapa = {};
   gastos.forEach(g => {
@@ -1203,7 +1203,7 @@ function getMesesComGastos() {
   });
   return Object.entries(mapa).sort((a,b) => b[0].localeCompare(a[0])).map(([k,v]) => ({...v, chave: k}));
 }
- 
+
 function abrirModalPDF() {
   mesesSelecionados.clear();
   const meses = getMesesComGastos();
@@ -1226,11 +1226,11 @@ function abrirModalPDF() {
   }
   document.getElementById('modal-pdf').classList.add('visivel');
 }
- 
+
 function fecharModalPDF() {
   document.getElementById('modal-pdf').classList.remove('visivel');
 }
- 
+
 function toggleMes(chave, el) {
   if (mesesSelecionados.has(chave)) {
     mesesSelecionados.delete(chave);
@@ -1241,16 +1241,16 @@ function toggleMes(chave, el) {
   }
   document.getElementById('btn-gerar-pdf').disabled = mesesSelecionados.size === 0;
 }
- 
+
 function gerarPDF() {
   fecharModalPDF();
   const mesesOrdenados = [...mesesSelecionados].sort();
   let conteudo = '';
- 
+
   mesesOrdenados.forEach(chave => {
     const [ano, mesIdx] = chave.split('-').map(Number);
     const nomeMes = new Date(ano, mesIdx, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
- 
+
     const gastosDoMes = gastos.filter(g => {
       const d = new Date(g.ts);
       return d.getMonth() === mesIdx && d.getFullYear() === ano;
@@ -1259,10 +1259,10 @@ function gerarPDF() {
       const d = new Date(p.vencimento);
       return d.getMonth() === mesIdx && d.getFullYear() === ano;
     }).map(p => ({...p, ts: new Date(p.vencimento).getTime(), _agendado: true}));
- 
+
     const todos = [...gastosDoMes, ...parcelasDoMes].sort((a,b) => a.ts - b.ts);
     const total = todos.reduce((s,g) => s + g.valor, 0);
- 
+
     const porCat = {};
     todos.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
     const catHtml = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).map(([cat, val]) =>
@@ -1271,7 +1271,7 @@ function gerarPDF() {
         ${cat} · R$ ${formatMoeda(val)}
       </span>`
     ).join('');
- 
+
     const itensHtml = todos.map(g =>
       `<tr>
         <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#222">
@@ -1282,7 +1282,7 @@ function gerarPDF() {
         <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#222;text-align:right;font-weight:600">R$ ${formatMoeda(g.valor)}</td>
       </tr>`
     ).join('');
- 
+
     conteudo += `
       <div style="page-break-after:always;padding:32px 40px;max-width:700px;margin:0 auto">
         <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
@@ -1290,14 +1290,14 @@ function gerarPDF() {
           <span style="font-size:12px;color:#aaa;font-family:monospace">// relatório</span>
         </div>
         <div style="font-size:13px;color:#888;font-family:monospace;margin-bottom:24px;text-transform:uppercase;letter-spacing:1px">${nomeMes}</div>
- 
+
         <div style="background:#f9f9f9;border-radius:12px;padding:20px;margin-bottom:20px">
           <div style="font-size:11px;color:#aaa;font-family:monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">total do mês</div>
           <div style="font-size:32px;font-weight:700;color:#111;font-family:monospace">R$ ${formatMoeda(total)}</div>
           <div style="font-size:12px;color:#999;margin-top:6px">${todos.length} lançamento${todos.length>1?'s':''}</div>
           <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:4px">${catHtml}</div>
         </div>
- 
+
         <table style="width:100%;border-collapse:collapse">
           <thead>
             <tr style="background:#f5f5f5">
@@ -1317,7 +1317,7 @@ function gerarPDF() {
         <div style="margin-top:32px;font-size:10px;color:#ccc;font-family:monospace;text-align:center">gerado por falou, lançou · ${new Date().toLocaleDateString('pt-BR')}</div>
       </div>`;
   });
- 
+
   const janela = window.open('', '_blank');
   janela.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório Falou, Lançou</title>
     <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:sans-serif;background:#fff}
@@ -1326,10 +1326,10 @@ function gerarPDF() {
   janela.document.close();
 }
 // ── FIM PDF ───────────────────────────────────────────────────────
- 
+
 let reconhecimento = null;
 let gravando = false;
- 
+
 function alternarMic() {
   if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
     mostrarConsulta("Seu navegador não suporta voz. Use Chrome ou Edge.");
@@ -1369,11 +1369,11 @@ function alternarMic() {
   };
   reconhecimento.start();
 }
- 
+
 document.getElementById('gasto-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') processar();
 });
- 
+
 loadGastos();
 atualizarTotal();
 renderHistorico();
