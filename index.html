@@ -133,7 +133,11 @@
     font-size: 11px;
     color: var(--text-mid);
     font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
   }
+  .cat-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .cat-pill.ativa { border-color: var(--accent); background: rgba(0,229,160,0.1); color: var(--accent); }
   .cat-dot {
     width: 6px; height: 6px;
     border-radius: 50%;
@@ -832,7 +836,7 @@ function renderComFiltro(filtro) {
     const porCat = {};
     todosItens.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
     const pillsHtml = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).map(([cat, val]) =>
-      `<div class="cat-pill">
+      `<div class="cat-pill${categoriaDestacada === cat ? ' ativa' : ''}" onclick="destacarCategoria('${cat}')">
         <div class="cat-dot" style="background:${CAT_COLORS[cat]||CAT_COLORS['outros']}"></div>
         ${cat} · R$ ${formatMoeda(val)}
       </div>`
@@ -931,6 +935,25 @@ function desenharGrafico(porCat, total, destaque) {
 
 let categoriaDestacada = null;
 function destacarCategoria(cat) {
+  if (categoriaDestacada === cat) {
+    categoriaDestacada = null;
+  } else {
+    categoriaDestacada = cat;
+  }
+  // Atualizar pills (remover/adicionar classe ativa)
+  document.querySelectorAll('.cat-pill').forEach(el => {
+    const nome = el.textContent.trim().split('·')[0].trim();
+    if (categoriaDestacada && nome === categoriaDestacada) {
+      el.classList.add('ativa');
+    } else {
+      el.classList.remove('ativa');
+    }
+  });
+  // Redesenhar gráfico
+  if (filtroAtivo) {
+    renderComFiltro(filtroAtivo);
+    return;
+  }
   const agora = new Date();
   const mesAtual = gastos.filter(g => {
     const d = new Date(g.ts);
@@ -939,13 +962,7 @@ function destacarCategoria(cat) {
   const total = mesAtual.reduce((s, g) => s + g.valor, 0);
   const porCat = {};
   mesAtual.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
-  if (categoriaDestacada === cat) {
-    categoriaDestacada = null;
-    desenharGrafico(porCat, total, null);
-  } else {
-    categoriaDestacada = cat;
-    desenharGrafico(porCat, total, cat);
-  }
+  desenharGrafico(porCat, total, categoriaDestacada);
 }
 
 function atualizarTotal() {
@@ -969,7 +986,7 @@ function atualizarTotal() {
   const porCat = {};
   mesAtual.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
   const html = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).map(([cat, val]) =>
-    `<div class="cat-pill">
+    `<div class="cat-pill${categoriaDestacada === cat ? ' ativa' : ''}" onclick="destacarCategoria('${cat}')">
       <div class="cat-dot" style="background:${CAT_COLORS[cat]||CAT_COLORS['outros']}"></div>
       ${cat} · R$ ${formatMoeda(val)}
     </div>`
