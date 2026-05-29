@@ -963,6 +963,7 @@ function destacarCategoria(cat) {
   const porCat = {};
   mesAtual.forEach(g => { porCat[g.categoria] = (porCat[g.categoria]||0) + g.valor; });
   desenharGrafico(porCat, total, categoriaDestacada);
+  renderHistorico();
 }
 
 function atualizarTotal() {
@@ -993,6 +994,7 @@ function atualizarTotal() {
   ).join('');
   document.getElementById('cats-row').innerHTML = html;
   desenharGrafico(porCat, total, categoriaDestacada);
+  renderHistorico();
 }
 
 function renderHistorico() {
@@ -1001,8 +1003,16 @@ function renderHistorico() {
     list.innerHTML = '<div class="empty-state">nenhum gasto registrado ainda</div>';
     return;
   }
-  const sorted = [...gastos].sort((a,b) => b.ts - a.ts);
-  list.innerHTML = sorted.map(g => {
+  // Filtrar por categoria se houver destaque ativo
+  let fonte = [...gastos].sort((a,b) => b.ts - a.ts);
+  if (categoriaDestacada) {
+    fonte = fonte.filter(g => g.categoria === categoriaDestacada);
+  }
+  if (fonte.length === 0) {
+    list.innerHTML = `<div class="empty-state">nenhum gasto em ${categoriaDestacada}</div>`;
+    return;
+  }
+  list.innerHTML = fonte.map(g => {
     const cor = CAT_COLORS[g.categoria] || CAT_COLORS['outros'];
     return `
     <div class="gasto-item" id="item-${g.id}">
